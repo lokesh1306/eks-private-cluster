@@ -101,4 +101,9 @@ module "app" {
     kubectl    = kubectl
     helm       = helm
   }
+  github_owner = var.github_owner
+  repo_name = var.repo_name
+  release_name = var.release_name
+  chart_name = var.chart_name
+  chart_version = var.chart_version
 }

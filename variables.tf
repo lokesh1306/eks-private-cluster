@@ -71,3 +71,29 @@ variable "karpenter_name" {
   type        = string
   description = "Karpenter Name Used"
 }
+
+// Helm
+variable "github_owner" {
+  description = "GitHub repository owner"
+  type        = string
+}
+
+variable "repo_name" {
+  description = "GitHub repository name"
+  type        = string
+}
+
+variable "release_name" {
+  description = "Name of the Helm release"
+  type        = string
+}
+
+variable "chart_name" {
+  description = "Name of the Helm chart"
+  type        = string
+}
+
+variable "chart_version" {
+  description = "Version of the Helm chart (leave empty for latest)"
+  type        = string
+}

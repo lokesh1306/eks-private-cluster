@@ -55,3 +55,16 @@ data "aws_iam_policy_document" "app" {
     effect = "Allow"
   }
 }
+
+resource "helm_release" "app" {
+  name       = var.release_name
+  repository = "https://${var.github_owner}.github.io/${var.repo_name}/charts"
+  chart      = var.chart_name
+  version    = var.chart_version
+  namespace  = kubernetes_namespace.app.metadata[0].name
+  
+  set {
+    name  = "timestamp"
+    value = timestamp()
+  }
+}

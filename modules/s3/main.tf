@@ -2,7 +2,8 @@ resource "random_uuid" "bucket1" {}
 resource "random_uuid" "bucket2" {}
 
 resource "aws_s3_bucket" "bucket1" {
-  bucket = "s3-bucket2-${var.common_tags["Environment"]}-${var.common_tags["Project"]}-${random_uuid.bucket1.result}"
+  bucket = "s3-bucket1-${var.common_tags["Environment"]}-${var.common_tags["Project"]}-${random_uuid.bucket1.result}"
+  force_destroy = true
 }
 
 resource "aws_s3_bucket_versioning" "bucket1_versioning" {
@@ -15,6 +16,7 @@ resource "aws_s3_bucket_versioning" "bucket1_versioning" {
 
 resource "aws_s3_bucket" "bucket2" {
   bucket = "s3-bucket2-${var.common_tags["Environment"]}-${var.common_tags["Project"]}-${random_uuid.bucket2.result}"
+  force_destroy = true
 }
 
 resource "aws_s3_bucket_versioning" "bucket2_versioning" {

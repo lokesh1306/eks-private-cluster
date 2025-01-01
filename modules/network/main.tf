@@ -33,7 +33,7 @@ resource "aws_subnet" "private_subnets" {
   tags = merge(
     {
       Name                     = "private-subnet-${count.index + 1}-${var.common_tags["Environment"]}-${var.common_tags["Project"]}"
-      "karpenter.sh/discovery" = "${var.common_tags["Project"]}-${var.common_tags["Environment"]}-${var.common_tags["Project"]}"
+      "karpenter.sh/discovery" = "${var.common_tags["Project"]}-${var.common_tags["Environment"]}"
     },
     var.common_tags
   )
