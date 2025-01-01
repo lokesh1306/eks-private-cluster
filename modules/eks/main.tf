@@ -6,7 +6,7 @@ module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "20.31"
 
-  cluster_name    = "${var.cluster_name}-${var.common_tags["Environment"]}-${var.common_tags["Project"]}"
+  cluster_name    = "${var.common_tags["Project"]}-${var.common_tags["Environment"]}"
   cluster_version = var.cluster_version
 
   cluster_enabled_log_types = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
@@ -15,11 +15,11 @@ module "eks" {
   subnet_ids               = var.private_subnet_ids
   control_plane_subnet_ids = var.private_subnet_ids
   node_security_group_tags = merge(var.common_tags, {
-    "karpenter.sh/discovery" = "${var.cluster_name}-${var.common_tags["Environment"]}-${var.common_tags["Project"]}"
+    "karpenter.sh/discovery" = "${var.common_tags["Project"]}-${var.common_tags["Environment"]}"
   })
   tags = merge(
     {
-      Name = "eks-${var.common_tags["Environment"]}-${var.common_tags["Project"]}"
+      Name = "eks-${var.common_tags["Project"]}-${var.common_tags["Environment"]}"
     },
     var.common_tags
   )
@@ -42,7 +42,7 @@ resource "aws_iam_role_policy" "eks_access" {
           "eks:ListClusters",
           "eks:DescribeCluster"
         ],
-        Resource = "arn:aws:eks:${var.region}:${data.aws_caller_identity.current.account_id}:cluster/${var.cluster_name}-${var.common_tags["Environment"]}-${var.common_tags["Project"]}"
+        Resource = "arn:aws:eks:${var.region}:${data.aws_caller_identity.current.account_id}:cluster/${module.eks.cluster_name}-${var.common_tags["Environment"]}-${var.common_tags["Project"]}"
       }
     ]
   })

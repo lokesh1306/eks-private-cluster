@@ -4,6 +4,6 @@ variable "common_tags" {
 }
 
 variable "app_role_name" {
-  type = string
+  type        = string
   description = "App role"
 }

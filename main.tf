@@ -40,7 +40,6 @@ module "network" {
 module "eks" {
   source             = "./modules/eks"
   common_tags        = local.common_tags
-  cluster_name       = var.cluster_name
   cluster_version    = var.cluster_version
   vpc_id             = module.network.vpc_id
   private_subnet_ids = module.network.private_subnet_ids
@@ -61,17 +60,17 @@ module "vpcpeer" {
 }
 
 module "s3" {
-  source                      = "./modules/s3"
-  common_tags                 = local.common_tags
+  source        = "./modules/s3"
+  common_tags   = local.common_tags
   app_role_name = module.app.app_role
-    depends_on = [ module.app ]
+  depends_on    = [module.app]
 }
 
 module "sqs" {
-  source                      = "./modules/sqs"
-  common_tags                 = local.common_tags
+  source        = "./modules/sqs"
+  common_tags   = local.common_tags
   app_role_name = module.app.app_role
-  depends_on = [ module.app ]
+  depends_on    = [module.app]
 }
 
 
@@ -85,11 +84,21 @@ module "karpenter" {
   oidc_provider      = module.eks.oidc_provider
   oidc_provider_arn  = module.eks.oidc_provider_arn
   cluster_endpoint   = module.eks.cluster_endpoint
+  providers = {
+    kubernetes = kubernetes
+    kubectl    = kubectl
+    helm       = helm
+  }
 }
 
 module "app" {
-  source = "./modules/app"
-  common_tags        = local.common_tags
-  oidc_provider      = module.eks.oidc_provider
-  oidc_provider_arn  = module.eks.oidc_provider_arn
+  source            = "./modules/app"
+  common_tags       = local.common_tags
+  oidc_provider     = module.eks.oidc_provider
+  oidc_provider_arn = module.eks.oidc_provider_arn
+  providers = {
+    kubernetes = kubernetes
+    kubectl    = kubectl
+    helm       = helm
+  }
 }

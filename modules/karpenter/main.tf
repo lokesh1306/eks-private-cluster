@@ -71,10 +71,10 @@ resource "aws_eks_addon" "vpc-cni" {
   cluster_name             = var.cluster_name
   addon_name               = "vpc-cni"
   service_account_role_arn = aws_iam_role.vpc_cni.arn
-  configuration_values     = jsonencode({
+  configuration_values = jsonencode({
     enableNetworkPolicy = "true"
   })
-  depends_on               = [time_sleep.wait_for_nodepool]
+  depends_on = [time_sleep.wait_for_nodepool]
 }
 
 resource "time_sleep" "wait_for_ebs" {

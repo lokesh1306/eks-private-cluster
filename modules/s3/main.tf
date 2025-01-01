@@ -33,9 +33,9 @@ resource "aws_iam_policy" "bucket1_policy" {
     Version = "2012-10-17",
     Statement = [
       {
-        Sid      = "ListBucket1",
-        Effect   = "Allow",
-        Action   = [
+        Sid    = "ListBucket1",
+        Effect = "Allow",
+        Action = [
           "s3:ListBucket",
           "s3:ListBucketVersions"
         ],
@@ -53,9 +53,9 @@ resource "aws_iam_policy" "bucket2_policy" {
     Version = "2012-10-17",
     Statement = [
       {
-        Sid       = "ListReadWriteBucket2",
-        Effect    = "Allow",
-        Action   = [
+        Sid    = "ListReadWriteBucket2",
+        Effect = "Allow",
+        Action = [
           "s3:GetObject",
           "s3:GetObjectVersion",
           "s3:PutObject",

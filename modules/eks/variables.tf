@@ -3,11 +3,6 @@ variable "common_tags" {
   type        = map(string)
 }
 
-variable "cluster_name" {
-  type        = string
-  description = "EKS Cluster Name"
-}
-
 variable "cluster_version" {
   type        = string
   description = "EKS Cluster Name"
@@ -29,8 +24,3 @@ variable "region" {
 }
 
 variable "remote_state" {}
-
-# variable "eks_kms_key" {
-#   type        = string
-#   description = "Cluster KMS Key"
-# }
