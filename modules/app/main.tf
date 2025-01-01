@@ -73,3 +73,53 @@ resource "helm_release" "app" {
     value = timestamp()
   }
 }
+
+
+
+resource "aws_security_group_rule" "mysql_ingress_eks" {
+  type              = "ingress"
+  from_port         = 3306
+  to_port           = 3306
+  protocol          = "tcp"
+  security_group_id = var.mysql_sg_id
+  cidr_blocks       = [var.vpc_cidr]
+}
+
+resource "aws_iam_policy" "rds_connect_policy" {
+  name = "rds-eks-${var.common_tags["Environment"]}-${var.common_tags["Project"]}"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = "rds-db:connect"
+        Resource = "arn:aws:rds-db:${var.region}:${data.aws_caller_identity.current.account_id}:dbuser:${var.mysql_cluster_id}/${var.app_mysql_user}"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "attach_rds_connect_policy" {
+  policy_arn = aws_iam_policy.rds_connect_policy.arn
+  role       = aws_iam_role.app.name
+}
+
+provider "mysql" {
+  endpoint = var.mysql_cluster_endpoint
+  username = var.mysql_cluster_master_username
+  password = var.mysql_cluster_master_password
+}
+
+resource "mysql_user" "app_user" {
+  user        = var.app_mysql_user
+  host        = "%"
+  auth_plugin = "AWSAuthenticationPlugin"
+}
+
+resource "mysql_grant" "app_user_privileges" {
+  user       = mysql_user.app_user.user
+  host       = mysql_user.app_user.host
+  database   = var.mysql_cluster_database_name
+  privileges = ["SELECT", "INSERT", "UPDATE", "DELETE", "CREATE", "DROP", "INDEX", "ALTER"]
+}

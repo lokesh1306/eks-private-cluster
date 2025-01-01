@@ -35,3 +35,65 @@ variable "vpc_cidr" {
 }
 
 variable "remote_state" {}
+
+variable "rds_cluster_identifier" {
+  type        = string
+  description = "RDS Cluster Identifier"
+}
+
+variable "rds_engine_version" {
+  type        = string
+  description = "RDS Engine Version"
+}
+
+variable "rds_database_name" {
+  type        = string
+  description = "RDS Database Name"
+}
+
+variable "rds_master_username" {
+  type        = string
+  description = "RDS Master Username"
+  ephemeral = true
+}
+
+variable "rds_master_password" {
+  type        = string
+  description = "RDS Master Password"
+  ephemeral = true
+}
+
+variable "rds_backup_retention_period" {
+  type        = number
+  description = "RDS Backup Retention Period"
+}
+
+variable "rds_preferred_backup_window" {
+  type        = string
+  description = "RDS Backup Window"
+}
+
+variable "rds_engine" {
+  type        = string
+  description = "RDS Engine"
+}
+
+variable "db_cluster_instance_class" {
+  type        = string
+  description = "RDS Cluster Instance Class"
+}
+
+variable "rds_storage_type" {
+  type        = string
+  description = "RDS Storage Type"
+}
+
+variable "rds_allocated_storage" {
+  type        = number
+  description = "RDS Allocated Storage"
+}
+
+variable "rds_iops" {
+  type        = number
+  description = "RDS IOPS"
+}

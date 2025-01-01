@@ -111,6 +111,15 @@ module "app" {
   release_name  = var.release_name
   chart_name    = var.chart_name
   chart_version = var.chart_version
+  mysql_sg_id = module.rds.mysql_sg_id
+  vpc_cidr           = var.vpc_cidr
+  region             = var.region
+  mysql_cluster_id = module.rds.mysql_cluster_id
+  mysql_cluster_endpoint = module.rds.mysql_cluster_endpoint
+  mysql_cluster_master_username = module.rds.mysql_cluster_master_username
+  mysql_cluster_master_password = module.rds.mysql_cluster_master_password
+  mysql_cluster_database_name = module.rds.mysql_cluster_database_name
+  app_mysql_user = var.app_mysql_user
   depends_on    = [module.karpenter]
 }
 
@@ -124,4 +133,16 @@ module "mysql" {
   region             = var.region
   vpc_cidr           = var.vpc_cidr
   remote_state       = data.terraform_remote_state.init
+  rds_cluster_identifier = var.rds_cluster_identifier
+  rds_engine = var.rds_engine
+  rds_database_name = var.rds_database_name
+  rds_engine_version = var.rds_engine_version
+  rds_master_username = var.rds_master_username
+  rds_master_password = var.rds_master_password
+  rds_backup_retention_period = var.rds_backup_retention_period
+  rds_preferred_backup_window = var.rds_preferred_backup_window
+  db_cluster_instance_class = var.db_cluster_instance_class
+  rds_storage_type = var.rds_storage_type
+  rds_allocated_storage = var.rds_allocated_storage
+  rds_iops = var.rds_iops
 }
