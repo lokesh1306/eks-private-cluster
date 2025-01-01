@@ -1,3 +1,4 @@
+# Project VPC
 resource "aws_vpc" "main" {
   cidr_block           = var.vpc_cidr
   enable_dns_hostnames = true
@@ -9,6 +10,7 @@ resource "aws_vpc" "main" {
   )
 }
 
+# Private Subnets
 resource "aws_subnet" "public_subnets" {
   count                   = length(var.public_subnet_cidrs)
   cidr_block              = element(var.public_subnet_cidrs, count.index)
@@ -24,6 +26,7 @@ resource "aws_subnet" "public_subnets" {
   )
 }
 
+# Public Subnets
 resource "aws_subnet" "private_subnets" {
   count             = length(var.private_subnet_cidrs)
   cidr_block        = element(var.private_subnet_cidrs, count.index)
@@ -39,6 +42,7 @@ resource "aws_subnet" "private_subnets" {
   )
 }
 
+# Internet gateway for public subnets
 resource "aws_internet_gateway" "gateway" {
   vpc_id = aws_vpc.main.id
 
@@ -50,17 +54,19 @@ resource "aws_internet_gateway" "gateway" {
   )
 }
 
+# Elastic IP for NAT Gateway
 resource "aws_eip" "nat" {
   count  = length(var.public_subnet_cidrs)
   domain = "vpc"
   tags = merge(
     {
-      Name = "nat-gw-eip-${count.index + 1}-${var.common_tags["Environment"]}-${var.common_tags["Project"]}"
+      Name = "eip-nat-gw-${count.index + 1}-${var.common_tags["Environment"]}-${var.common_tags["Project"]}"
     },
     var.common_tags
   )
 }
 
+# NAT Gateway for private subnets
 resource "aws_nat_gateway" "natgw" {
   count         = length(var.public_subnet_cidrs)
   allocation_id = element(aws_eip.nat[*].id, count.index)
@@ -76,6 +82,7 @@ resource "aws_nat_gateway" "natgw" {
   depends_on = [aws_internet_gateway.gateway]
 }
 
+# Public subnet route table
 resource "aws_route_table" "public_subnet_route_table" {
   count  = length(var.public_subnet_cidrs)
   vpc_id = aws_vpc.main.id
@@ -88,6 +95,7 @@ resource "aws_route_table" "public_subnet_route_table" {
   )
 }
 
+# Public subnets routes
 resource "aws_route" "public_rt" {
   count                  = length(var.public_subnet_cidrs)
   route_table_id         = aws_route_table.public_subnet_route_table[count.index].id
@@ -95,12 +103,14 @@ resource "aws_route" "public_rt" {
   gateway_id             = aws_internet_gateway.gateway.id
 }
 
+# Public subnets route tables assocation
 resource "aws_route_table_association" "public_subnet" {
   count          = length(var.public_subnet_cidrs)
   subnet_id      = element(aws_subnet.public_subnets[*].id, count.index)
   route_table_id = element(aws_route_table.public_subnet_route_table[*].id, count.index)
 }
 
+# Private subnet route tables
 resource "aws_route_table" "private_subnet_route_table" {
   count  = length(var.private_subnet_cidrs)
   vpc_id = aws_vpc.main.id
@@ -114,25 +124,17 @@ resource "aws_route_table" "private_subnet_route_table" {
   depends_on = [aws_nat_gateway.natgw]
 }
 
+# Private subnet route tables assocation
 resource "aws_route_table_association" "private_subnet" {
   count          = length(var.private_subnet_cidrs)
   subnet_id      = element(aws_subnet.private_subnets[*].id, count.index)
   route_table_id = element(aws_route_table.private_subnet_route_table[*].id, count.index)
 }
 
+# Private subnet route table routes
 resource "aws_route" "private_rt" {
   count                  = length(var.private_subnet_cidrs)
   route_table_id         = aws_route_table.private_subnet_route_table[count.index].id
   destination_cidr_block = "0.0.0.0/0"
   nat_gateway_id         = aws_nat_gateway.natgw[count.index].id
 }
-
-# resource "aws_security_group_rule" "ssm_ingress" {
-#   type                     = "ingress"
-#   from_port                = 0
-#   to_port                  = 65535
-#   protocol                 = "-1"
-#   security_group_id        = aws_security_group.ssm_sg.id
-#   source_security_group_id = aws_security_group.ec2_sg.id
-#   depends_on               = [aws_security_group_rule.ec2_egress_ssm]
-# }

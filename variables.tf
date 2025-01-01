@@ -1,3 +1,4 @@
+// General variables
 variable "region" {
   type        = string
   description = "Region where the resources will be deployed"
@@ -55,15 +56,25 @@ variable "cluster_version" {
   description = "EKS Cluster Version"
 }
 
-// SSM Module
-variable "bastion_ami_id" {
-  type        = string
-  description = "AMI ID of the Bastion Host"
+// SQS Module
+variable "visibility_timeout_seconds" {
+  type        = number
+  description = "SQS queue visibility timeout"
 }
 
-variable "bastion_instance_type" {
-  type        = string
-  description = "Bastion Host Instance Type"
+variable "message_retention_seconds" {
+  type        = number
+  description = "SQS queue message retention timeout"
+}
+
+variable "delay_seconds" {
+  type        = number
+  description = "SQS queue delay seconds"
+}
+
+variable "fifo_queue" {
+  type        = bool
+  description = "SQS queue fifo or no"
 }
 
 // Karpenter Module
@@ -72,7 +83,7 @@ variable "karpenter_name" {
   description = "Karpenter Name Used"
 }
 
-// Helm
+// App module
 variable "github_owner" {
   description = "GitHub repository owner"
   type        = string

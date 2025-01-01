@@ -2,10 +2,10 @@ data "aws_caller_identity" "current" {}
 
 resource "aws_sqs_queue" "sqs_queue" {
   name                       = "sqs-queue-${var.common_tags["Environment"]}-${var.common_tags["Project"]}"
-  visibility_timeout_seconds = 30
-  message_retention_seconds  = 86400
-  delay_seconds              = 0
-  fifo_queue                 = false
+  visibility_timeout_seconds = var.visibility_timeout_seconds
+  message_retention_seconds  = var.message_retention_seconds
+  delay_seconds              = var.delay_seconds
+  fifo_queue                 = var.fifo_queue
 
   tags = merge(
     {

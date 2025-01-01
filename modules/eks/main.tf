@@ -1,7 +1,7 @@
 data "aws_caller_identity" "current" {}
-
 data "aws_region" "current" {}
 
+# EKS Module
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "20.31"
@@ -25,13 +25,10 @@ module "eks" {
   )
 }
 
-data "aws_iam_role" "ssm_role" {
-  name = "EC2-SSM-Access-Role"
-}
-
+# Role for EKS access
 resource "aws_iam_role_policy" "eks_access" {
-  name = "eks-access-policy"
-  role = data.aws_iam_role.ssm_role.name
+  name = "eks-access-policy-${var.common_tags["Project"]}-${var.common_tags["Environment"]}"
+  role = var.remote_state.outputs.ssm_role_name
 
   policy = jsonencode({
     Version = "2012-10-17",
@@ -48,22 +45,25 @@ resource "aws_iam_role_policy" "eks_access" {
   })
 }
 
+# EKS access for SSM
 resource "aws_eks_access_entry" "eks" {
   cluster_name  = module.eks.cluster_name
-  principal_arn = data.aws_iam_role.ssm_role.arn
+  principal_arn = var.remote_state.outputs.ssm_role_arn
   type          = "STANDARD"
 }
 
+# EKS SSM access policy association
 resource "aws_eks_access_policy_association" "eks" {
   cluster_name  = module.eks.cluster_name
   policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
-  principal_arn = data.aws_iam_role.ssm_role.arn
+  principal_arn = var.remote_state.outputs.ssm_role_arn
 
   access_scope {
     type = "cluster"
   }
 }
 
+# SSM Egress SG for EKS
 resource "aws_security_group_rule" "ec2_egress" {
   type                     = "egress"
   from_port                = 0
@@ -73,6 +73,7 @@ resource "aws_security_group_rule" "ec2_egress" {
   source_security_group_id = module.eks.cluster_primary_security_group_id
 }
 
+# EKS Ingress SG for SSM
 resource "aws_security_group_rule" "eks_ingress" {
   type                     = "ingress"
   from_port                = 0

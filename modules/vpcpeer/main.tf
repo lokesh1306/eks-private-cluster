@@ -1,3 +1,4 @@
+# VPC peering origin
 resource "aws_vpc_peering_connection" "peer" {
   vpc_id      = var.vpc_id
   peer_vpc_id = var.remote_state.outputs.vpc_id
@@ -17,6 +18,7 @@ resource "aws_vpc_peering_connection" "peer" {
   )
 }
 
+# VPC peering accepter
 resource "aws_vpc_peering_connection_accepter" "peer_accepter" {
   vpc_peering_connection_id = aws_vpc_peering_connection.peer.id
   auto_accept               = true
@@ -29,6 +31,7 @@ resource "aws_vpc_peering_connection_accepter" "peer_accepter" {
   )
 }
 
+# EKS VPC route to EC2 VPC
 resource "aws_route" "eks_to_ec2" {
   count                     = length(var.private_subnet_route_tables)
   route_table_id            = var.private_subnet_route_tables[count.index]
@@ -36,6 +39,7 @@ resource "aws_route" "eks_to_ec2" {
   vpc_peering_connection_id = aws_vpc_peering_connection.peer.id
 }
 
+# EC2 VPC route to EKS VPC
 resource "aws_route" "ec2_to_eks" {
   for_each                  = toset(sort(var.remote_state.outputs.route_table_id))
   route_table_id            = each.key

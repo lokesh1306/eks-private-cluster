@@ -67,10 +67,14 @@ module "s3" {
 }
 
 module "sqs" {
-  source        = "./modules/sqs"
-  common_tags   = local.common_tags
-  app_role_name = module.app.app_role
-  depends_on    = [module.app]
+  source                     = "./modules/sqs"
+  common_tags                = local.common_tags
+  app_role_name              = module.app.app_role
+  visibility_timeout_seconds = var.visibility_timeout_seconds
+  message_retention_seconds  = var.message_retention_seconds
+  delay_seconds              = var.delay_seconds
+  fifo_queue                 = var.fifo_queue
+  depends_on                 = [module.app]
 }
 
 
@@ -89,6 +93,7 @@ module "karpenter" {
     kubectl    = kubectl
     helm       = helm
   }
+  depends_on = [module.eks]
 }
 
 module "app" {
@@ -101,9 +106,22 @@ module "app" {
     kubectl    = kubectl
     helm       = helm
   }
-  github_owner = var.github_owner
-  repo_name = var.repo_name
-  release_name = var.release_name
-  chart_name = var.chart_name
+  github_owner  = var.github_owner
+  repo_name     = var.repo_name
+  release_name  = var.release_name
+  chart_name    = var.chart_name
   chart_version = var.chart_version
+  depends_on    = [module.karpenter]
+}
+
+module "mysql" {
+  source             = "./modules/rds"
+  common_tags        = local.common_tags
+  private_subnet_ids = module.network.private_subnet_ids
+  azs                = var.azs
+  vpc_id             = module.network.vpc_id
+  app_role_name      = module.app.app_role
+  region             = var.region
+  vpc_cidr           = var.vpc_cidr
+  remote_state       = data.terraform_remote_state.init
 }

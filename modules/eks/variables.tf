@@ -5,22 +5,22 @@ variable "common_tags" {
 
 variable "cluster_version" {
   type        = string
-  description = "EKS Cluster Name"
+  description = "EKS Cluster Version"
 }
 
 variable "vpc_id" {
   type        = string
-  description = "VPC ID"
+  description = "EKS VPC ID"
 }
 
 variable "private_subnet_ids" {
-  description = "List of subnet IDs"
+  description = "EKS Private Subnet IDs"
   type        = list(string)
 }
 
 variable "region" {
   type        = string
-  description = "Region where the resources will be deployed"
+  description = "EKS VPC Region"
 }
 
 variable "remote_state" {}

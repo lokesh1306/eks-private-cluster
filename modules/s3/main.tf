@@ -1,11 +1,13 @@
 resource "random_uuid" "bucket1" {}
 resource "random_uuid" "bucket2" {}
 
+# S3 bucket1
 resource "aws_s3_bucket" "bucket1" {
-  bucket = "s3-bucket1-${var.common_tags["Environment"]}-${var.common_tags["Project"]}-${random_uuid.bucket1.result}"
+  bucket        = "s3-bucket1-${var.common_tags["Environment"]}-${var.common_tags["Project"]}-${random_uuid.bucket1.result}"
   force_destroy = true
 }
 
+# S3 bucket1 versioning 
 resource "aws_s3_bucket_versioning" "bucket1_versioning" {
   bucket = aws_s3_bucket.bucket1.id
 
@@ -14,11 +16,13 @@ resource "aws_s3_bucket_versioning" "bucket1_versioning" {
   }
 }
 
+# S3 bucket2
 resource "aws_s3_bucket" "bucket2" {
-  bucket = "s3-bucket2-${var.common_tags["Environment"]}-${var.common_tags["Project"]}-${random_uuid.bucket2.result}"
+  bucket        = "s3-bucket2-${var.common_tags["Environment"]}-${var.common_tags["Project"]}-${random_uuid.bucket2.result}"
   force_destroy = true
 }
 
+# S3 bucket2 versioning 
 resource "aws_s3_bucket_versioning" "bucket2_versioning" {
   bucket = aws_s3_bucket.bucket2.id
 
@@ -27,9 +31,9 @@ resource "aws_s3_bucket_versioning" "bucket2_versioning" {
   }
 }
 
+# S3 bucket1 list only policy 
 resource "aws_iam_policy" "bucket1_policy" {
-  name        = "s3-bucket1-policy-${var.common_tags["Environment"]}-${var.common_tags["Project"]}"
-  description = "Policy to allow listing objects in Bucket 1"
+  name = "s3-bucket1-policy-${var.common_tags["Environment"]}-${var.common_tags["Project"]}"
 
   policy = jsonencode({
     Version = "2012-10-17",
@@ -47,9 +51,9 @@ resource "aws_iam_policy" "bucket1_policy" {
   })
 }
 
+# S3 bucket2 policy to allow read/write only, no list
 resource "aws_iam_policy" "bucket2_policy" {
-  name        = "s3-bucket2-policy-${var.common_tags["Environment"]}-${var.common_tags["Project"]}"
-  description = "Policy to allow listing, reading, and writing to Bucket 2"
+  name = "s3-bucket2-policy-${var.common_tags["Environment"]}-${var.common_tags["Project"]}"
 
   policy = jsonencode({
     Version = "2012-10-17",
@@ -61,9 +65,7 @@ resource "aws_iam_policy" "bucket2_policy" {
           "s3:GetObject",
           "s3:GetObjectVersion",
           "s3:PutObject",
-          "s3:PutObjectVersion",
-          "s3:DeleteObject",
-          "s3:DeleteObjectVersion"
+          "s3:PutObjectVersion"
         ],
         Resource = [
           "arn:aws:s3:::${aws_s3_bucket.bucket2.bucket}",
@@ -74,11 +76,13 @@ resource "aws_iam_policy" "bucket2_policy" {
   })
 }
 
+# S3 bucket1 policy attachment to existing app role
 resource "aws_iam_role_policy_attachment" "attach_bucket1_policy" {
   role       = var.app_role_name
   policy_arn = aws_iam_policy.bucket1_policy.arn
 }
 
+# S3 bucket2 policy attachment to existing app role
 resource "aws_iam_role_policy_attachment" "attach_bucket2_policy" {
   role       = var.app_role_name
   policy_arn = aws_iam_policy.bucket2_policy.arn

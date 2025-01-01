@@ -13,6 +13,7 @@ locals {
   oidc_provider_arn    = var.oidc_provider_arn
 }
 
+# Fargate profile setup for EKS 
 resource "aws_eks_fargate_profile" "karpenter" {
   cluster_name           = var.cluster_name
   fargate_profile_name   = var.karpenter_name
@@ -34,6 +35,7 @@ resource "aws_eks_fargate_profile" "karpenter" {
   )
 }
 
+# Fargate profile removal after provisioning
 resource "null_resource" "delete_fargate_profile" {
   provisioner "local-exec" {
     command = <<EOT
@@ -47,7 +49,7 @@ resource "null_resource" "delete_fargate_profile" {
   depends_on = [aws_eks_addon.ebs]
 }
 
-// EKS Addons
+# EKS Addons
 resource "aws_eks_addon" "ebs" {
   cluster_name             = var.cluster_name
   addon_name               = "aws-ebs-csi-driver"
@@ -110,6 +112,7 @@ resource "helm_release" "secrets_store_csi_driver_provider_aws" {
   depends_on = [helm_release.csi_secrets_store]
 }
 
+# Karpenter module
 module "karpenter" {
   source  = "terraform-aws-modules/eks/aws//modules/karpenter"
   version = "~> 20.11"
@@ -162,12 +165,14 @@ resource "helm_release" "karpenter" {
   depends_on = [module.karpenter]
 }
 
+# Time for Karpenter pod provisioning
 resource "time_sleep" "wait_30_seconds" {
   depends_on = [helm_release.karpenter]
 
   create_duration = "30s"
 }
 
+# Karpenter node class
 resource "kubectl_manifest" "karpenter_node_class" {
   yaml_body = <<-YAML
     apiVersion: karpenter.k8s.aws/v1beta1
@@ -207,6 +212,7 @@ resource "kubectl_manifest" "karpenter_node_class" {
   ]
 }
 
+# Karpenter node pool
 resource "kubectl_manifest" "karpenter_node_pool" {
   yaml_body = <<-YAML
     apiVersion: karpenter.sh/v1beta1
@@ -245,11 +251,13 @@ resource "kubectl_manifest" "karpenter_node_pool" {
   ]
 }
 
+# Time wait after node pool setup
 resource "time_sleep" "wait_for_nodepool" {
   depends_on      = [kubectl_manifest.karpenter_node_pool]
   create_duration = "60s"
 }
 
+# EKS acess entry for Karpenter nodes
 resource "aws_eks_access_entry" "eks" {
   cluster_name  = var.cluster_name
   principal_arn = aws_iam_role.karpenter_node_role.arn
@@ -257,12 +265,13 @@ resource "aws_eks_access_entry" "eks" {
   depends_on    = [helm_release.karpenter]
 }
 
-// IAM
+# Policy for EBS to access KMS
 resource "aws_iam_policy" "eks_kms_policy_ebs" {
   name   = "eks-kms-policy_ebs"
   policy = data.aws_iam_policy_document.eks_kms_policy_ebs.json
 }
 
+# Policy document for EBS to access KMS
 data "aws_iam_policy_document" "eks_kms_policy_ebs" {
   statement {
     effect    = "Allow"
@@ -271,10 +280,12 @@ data "aws_iam_policy_document" "eks_kms_policy_ebs" {
   }
 }
 
+# EBS policy for KMS access attachment
 resource "aws_iam_role_policy_attachment" "eks_kms_policy_attachment_ebs" {
   role       = aws_iam_role.karpenter_node_role.name
   policy_arn = aws_iam_policy.eks_kms_policy_ebs.arn
 }
+
 
 data "aws_iam_policy" "node_management_group_policy" {
   for_each = toset(["AmazonEKSWorkerNodePolicy", "AmazonEC2ContainerRegistryReadOnly", "AmazonEKS_CNI_Policy", "AmazonEBSCSIDriverPolicy"])

@@ -2,6 +2,7 @@ data "aws_caller_identity" "current" {}
 data "aws_availability_zones" "available" {}
 data "aws_partition" "current" {}
 
+# k8 namespace for app
 resource "kubernetes_namespace" "app" {
   metadata {
     name   = "app"
@@ -9,6 +10,7 @@ resource "kubernetes_namespace" "app" {
   }
 }
 
+# k8 SA for app
 resource "kubernetes_service_account" "app-sa" {
   metadata {
     name      = "sa-${var.common_tags["Project"]}"
@@ -19,6 +21,7 @@ resource "kubernetes_service_account" "app-sa" {
   }
 }
 
+# k8 app role
 resource "aws_iam_role" "app" {
   name               = "app-role-${var.common_tags["Project"]}"
   assume_role_policy = data.aws_iam_policy_document.app.json
@@ -31,6 +34,7 @@ resource "aws_iam_role" "app" {
   )
 }
 
+# k8 app role trust policy
 data "aws_iam_policy_document" "app" {
   statement {
     actions = ["sts:AssumeRoleWithWebIdentity"]
@@ -56,13 +60,14 @@ data "aws_iam_policy_document" "app" {
   }
 }
 
+# k8 app helm chart
 resource "helm_release" "app" {
   name       = var.release_name
   repository = "https://${var.github_owner}.github.io/${var.repo_name}/charts"
   chart      = var.chart_name
   version    = var.chart_version
   namespace  = kubernetes_namespace.app.metadata[0].name
-  
+
   set {
     name  = "timestamp"
     value = timestamp()
