@@ -1,7 +1,7 @@
 data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
-# MySQL Cluster
+# Aurora Cluster
 resource "aws_rds_cluster" "mysql_cluster" {
   cluster_identifier                  = var.rds_cluster_identifier
   engine                              = var.rds_engine
@@ -12,10 +12,9 @@ resource "aws_rds_cluster" "mysql_cluster" {
   backup_retention_period             = var.rds_backup_retention_period
   preferred_backup_window             = var.rds_preferred_backup_window
   storage_encrypted                   = true
-  db_cluster_instance_class           = var.db_cluster_instance_class
   storage_type                        = var.rds_storage_type
-  allocated_storage                   = var.rds_allocated_storage
-  iops                                = var.rds_iops
+  # allocated_storage                   = var.rds_allocated_storage
+  # db_cluster_instance_class           = var.db_cluster_instance_class
   vpc_security_group_ids              = [aws_security_group.mysql_sg.id]
   db_subnet_group_name                = aws_db_subnet_group.mysql_subnet_group.name
   skip_final_snapshot                 = true
@@ -30,25 +29,25 @@ resource "aws_rds_cluster" "mysql_cluster" {
   )
 }
 
-# resource "aws_rds_cluster_instance" "mysql_read_replica_1" {
-#   identifier             = "${var.rds_cluster_identifier}-replica1"
-#   cluster_identifier     = aws_rds_cluster.mysql_cluster.id
-#   instance_class         = var.db_cluster_instance_class
-#   engine                 = var.rds_engine
-#   engine_version         = var.rds_engine_version
-#   publicly_accessible    = false
-#   auto_minor_version_upgrade = true
-# }
+# writer instance
+resource "aws_rds_cluster_instance" "writer" {
+  identifier         = "writer"
+  cluster_identifier = aws_rds_cluster.mysql_cluster.id
+  instance_class     = var.db_cluster_instance_class
+  engine             = var.rds_engine
+  engine_version     = var.rds_engine_version
+}
 
-# resource "aws_rds_cluster_instance" "mysql_read_replica_2" {
-#   identifier             = "${var.rds_cluster_identifier}-replica2"
-#   cluster_identifier     = aws_rds_cluster.mysql_cluster.id
-#   instance_class         = var.db_cluster_instance_class
-#   engine                 = var.rds_engine
-#   engine_version         = var.rds_engine_version
-#   publicly_accessible    = false
-#   auto_minor_version_upgrade = true
-# }
+# reader instances
+resource "aws_rds_cluster_instance" "readers" {
+  count              = 2  
+  identifier         = "reader-${count.index}"
+  cluster_identifier = aws_rds_cluster.mysql_cluster.id
+  instance_class     = var.db_cluster_instance_class
+  engine             = var.rds_engine
+  engine_version     = var.rds_engine_version
+  promotion_tier     = count.index + 2
+}
 
 # Subnet group
 resource "aws_db_subnet_group" "mysql_subnet_group" {

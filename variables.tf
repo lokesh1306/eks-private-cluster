@@ -150,15 +150,15 @@ variable "rds_storage_type" {
   description = "RDS Storage Type"
 }
 
-variable "rds_allocated_storage" {
-  type        = number
-  description = "RDS Allocated Storage"
-}
+# variable "rds_allocated_storage" {
+#   type        = number
+#   description = "RDS Allocated Storage"
+# }
 
-variable "rds_iops" {
-  type        = number
-  description = "RDS IOPS"
-}
+# variable "rds_iops" {
+#   type        = number
+#   description = "RDS IOPS"
+# }
 
 variable "master_username" {
   type        = string

@@ -63,3 +63,29 @@ resource "aws_iam_role_policy_attachment" "attach_sqs_policy" {
   role       = var.app_role_name
   policy_arn = aws_iam_policy.sqs_eks_policy.arn
 }
+
+# SG for endpoint
+data "aws_security_group" "eks_sg" {
+  filter {
+    name   = "group-name"
+    values = ["eks-prod-node-*"]
+  }
+  vpc_id = var.vpc_id
+}
+
+# SQS VPCe
+resource "aws_vpc_endpoint" "sqs" {
+  vpc_id              = var.vpc_id
+  service_name        = "com.amazonaws.${var.region}.sqs"
+  vpc_endpoint_type   = "Interface"
+  subnet_ids          = var.private_subnet_ids
+  security_group_ids  = [data.aws_security_group.eks_sg.id]
+  private_dns_enabled = true
+
+  tags = merge(
+    {
+      Name = "sqs-endpoint-${var.common_tags["Environment"]}"
+    },
+    var.common_tags
+  )
+}

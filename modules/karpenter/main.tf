@@ -45,8 +45,18 @@ resource "null_resource" "delete_fargate_profile" {
         --fargate-profile-name karpenter
     EOT
   }
-  
+
   depends_on = [aws_eks_addon.ebs]
+}
+
+# Metrics for hpa
+resource "helm_release" "metrics_server" {
+  name       = "metrics-server"
+  chart      = "metrics-server"
+  repository = "https://kubernetes-sigs.github.io/metrics-server/"
+  namespace  = "kube-system"
+  version    = "3.12.2"
+  depends_on = [null_resource.delete_fargate_profile]
 }
 
 # EKS Addons

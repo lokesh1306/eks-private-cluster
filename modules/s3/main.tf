@@ -87,3 +87,16 @@ resource "aws_iam_role_policy_attachment" "attach_bucket2_policy" {
   role       = var.app_role_name
   policy_arn = aws_iam_policy.bucket2_policy.arn
 }
+
+resource "aws_vpc_endpoint" "s3" {
+  vpc_id            = var.vpc_id
+  service_name      = "com.amazonaws.${var.region}.s3"
+  vpc_endpoint_type = "Gateway"
+  route_table_ids   = var.private_subnet_route_tables
+  tags = merge(
+    {
+      Name = "s3-endpoint-${var.common_tags["Environment"]}"
+    },
+    var.common_tags
+  )
+}

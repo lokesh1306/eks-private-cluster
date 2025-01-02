@@ -60,10 +60,13 @@ module "vpcpeer" {
 }
 
 module "s3" {
-  source        = "./modules/s3"
-  common_tags   = local.common_tags
-  app_role_name = module.app.app_role
-  depends_on    = [module.app]
+  source                      = "./modules/s3"
+  common_tags                 = local.common_tags
+  app_role_name               = module.app.app_role
+  vpc_id                      = module.network.vpc_id
+  private_subnet_route_tables = module.network.private_subnet_route_tables
+  region                      = var.region
+  depends_on                  = [module.app]
 }
 
 module "sqs" {
@@ -74,6 +77,9 @@ module "sqs" {
   message_retention_seconds  = var.message_retention_seconds
   delay_seconds              = var.delay_seconds
   fifo_queue                 = var.fifo_queue
+  vpc_id                     = module.network.vpc_id
+  region                     = var.region
+  private_subnet_ids         = module.network.private_subnet_ids
   depends_on                 = [module.app]
 }
 
@@ -106,20 +112,20 @@ module "app" {
     kubectl    = kubectl
     helm       = helm
   }
-  github_owner                = var.github_owner
-  repo_name                   = var.repo_name
-  release_name                = var.release_name
-  chart_name                  = var.chart_name
-  chart_version               = var.chart_version
-  mysql_sg_id                 = module.rds.mysql_sg_id
-  vpc_cidr                    = var.vpc_cidr
-  region                      = var.region
-  mysql_cluster_id            = module.rds.mysql_cluster_id
-  cluster_resource_id = module.rds.cluster_resource_id
-  mysql_cluster_endpoint      = module.rds.mysql_cluster_endpoint
-  mysql_cluster_database_name = module.rds.mysql_cluster_database_name
-  app_mysql_user              = var.app_mysql_user
-  cluster_name_fargate        = module.karpenter.cluster_name_fargate
+  github_owner                      = var.github_owner
+  repo_name                         = var.repo_name
+  release_name                      = var.release_name
+  chart_name                        = var.chart_name
+  chart_version                     = var.chart_version
+  mysql_sg_id                       = module.rds.mysql_sg_id
+  vpc_cidr                          = var.vpc_cidr
+  region                            = var.region
+  mysql_cluster_id                  = module.rds.mysql_cluster_id
+  cluster_resource_id               = module.rds.cluster_resource_id
+  mysql_cluster_endpoint            = module.rds.mysql_cluster_endpoint
+  mysql_cluster_database_name       = module.rds.mysql_cluster_database_name
+  app_mysql_user                    = var.app_mysql_user
+  cluster_name_fargate              = module.karpenter.cluster_name_fargate
   delete_fargate_profile_dependency = module.karpenter.delete_fargate_profile_complete
 }
 
@@ -140,9 +146,9 @@ module "rds" {
   master_username             = var.master_username
   rds_backup_retention_period = var.rds_backup_retention_period
   rds_preferred_backup_window = var.rds_preferred_backup_window
-  db_cluster_instance_class   = var.db_cluster_instance_class
+  # db_cluster_instance_class   = var.db_cluster_instance_class
   rds_storage_type            = var.rds_storage_type
-  rds_allocated_storage       = var.rds_allocated_storage
-  rds_iops                    = var.rds_iops
+  # rds_allocated_storage       = var.rds_allocated_storage
+  # rds_iops                    = var.rds_iops
   depends_on                  = [module.vpcpeer]
 }
