@@ -30,16 +30,15 @@ chart_name    = "eks-app"
 chart_version = null
 
 # MySQL module vars
-rds_engine_version = "8.0.40"
-rds_database_name = "app"
-rds_master_username = "admin"
-rds_master_password = "password"
+rds_engine_version          = "8.0.40"
+rds_database_name           = "app"
 rds_backup_retention_period = 7
 rds_preferred_backup_window = "07:00-09:00"
-rds_cluster_identifier = "mysql-multi-az-cluster"
-rds_engine = "mysql"
-db_cluster_instance_class           = "db.c6gd.medium"
-rds_storage_type = "io1"
-rds_allocated_storage = 100
-rds_iops = 1000
-app_mysql_user = "app"
+rds_cluster_identifier      = "mysql-multi-az-cluster"
+rds_engine                  = "mysql"
+db_cluster_instance_class   = "db.c6gd.medium"
+rds_storage_type            = "io1"
+rds_allocated_storage       = 100
+rds_iops                    = 1000
+app_mysql_user              = "appuser"
+master_username             = "admin"

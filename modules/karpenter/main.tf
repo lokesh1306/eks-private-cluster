@@ -15,7 +15,7 @@ locals {
 
 # Fargate profile setup for EKS 
 resource "aws_eks_fargate_profile" "karpenter" {
-  cluster_name           = var.cluster_name
+  cluster_name           = "${var.common_tags["Project"]}-${var.common_tags["Environment"]}"
   fargate_profile_name   = var.karpenter_name
   pod_execution_role_arn = aws_iam_role.fargate.arn
   subnet_ids             = var.private_subnet_ids
@@ -42,7 +42,7 @@ resource "null_resource" "delete_fargate_profile" {
       aws eks delete-fargate-profile \
         --cluster-name ${var.cluster_name} \
         --region ${var.region} \
-        --fargate-profile-name ${aws_eks_fargate_profile.karpenter.fargate_profile_name}
+        --fargate-profile-name karpenter
     EOT
   }
 

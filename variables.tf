@@ -130,18 +130,6 @@ variable "rds_database_name" {
   description = "RDS Database Name"
 }
 
-variable "rds_master_username" {
-  type        = string
-  description = "RDS Master Username"
-  ephemeral = true
-}
-
-variable "rds_master_password" {
-  type        = string
-  description = "RDS Master Password"
-  ephemeral = true
-}
-
 variable "rds_backup_retention_period" {
   type        = number
   description = "RDS Backup Retention Period"
@@ -172,8 +160,12 @@ variable "rds_iops" {
   description = "RDS IOPS"
 }
 
+variable "master_username" {
+  type        = string
+  description = "Master Username"
+}
+
 variable "app_mysql_user" {
   type        = string
   description = "App MySQL User"
-  ephemeral = true
 }

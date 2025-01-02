@@ -2,6 +2,18 @@ data "aws_caller_identity" "current" {}
 data "aws_availability_zones" "available" {}
 data "aws_partition" "current" {}
 
+data "aws_rds_cluster" "mysql_cluster" {
+  cluster_identifier = var.mysql_cluster_id
+}
+
+ephemeral "aws_secretsmanager_secret_version" "mysql" {
+  secret_id = data.aws_rds_cluster.mysql_cluster.master_user_secret[0].secret_arn
+}
+
+locals {
+  mysql_credentials = jsondecode(ephemeral.aws_secretsmanager_secret_version.mysql.secret_string)
+}
+
 # k8 namespace for app
 resource "kubernetes_namespace" "app" {
   metadata {
@@ -28,7 +40,8 @@ resource "aws_iam_role" "app" {
 
   tags = merge(
     {
-      Name = "app-role-${var.common_tags["Environment"]}-${var.common_tags["Project"]}"
+      Name    = "app-role-${var.common_tags["Environment"]}-${var.common_tags["Project"]}"
+      Cluster = var.cluster_name_fargate
     },
     var.common_tags
   )
@@ -74,8 +87,7 @@ resource "helm_release" "app" {
   }
 }
 
-
-
+# App access to DB
 resource "aws_security_group_rule" "mysql_ingress_eks" {
   type              = "ingress"
   from_port         = 3306
@@ -85,6 +97,7 @@ resource "aws_security_group_rule" "mysql_ingress_eks" {
   cidr_blocks       = [var.vpc_cidr]
 }
 
+# App auth to RDS
 resource "aws_iam_policy" "rds_connect_policy" {
   name = "rds-eks-${var.common_tags["Environment"]}-${var.common_tags["Project"]}"
 
@@ -100,26 +113,23 @@ resource "aws_iam_policy" "rds_connect_policy" {
   })
 }
 
+# App RDS auth attachment
 resource "aws_iam_role_policy_attachment" "attach_rds_connect_policy" {
   policy_arn = aws_iam_policy.rds_connect_policy.arn
   role       = aws_iam_role.app.name
 }
 
-provider "mysql" {
-  endpoint = var.mysql_cluster_endpoint
-  username = var.mysql_cluster_master_username
-  password = var.mysql_cluster_master_password
-}
-
+# MySQL app user
 resource "mysql_user" "app_user" {
   user        = var.app_mysql_user
-  host        = "%"
+  host        = var.vpc_cidr
   auth_plugin = "AWSAuthenticationPlugin"
 }
 
+# MySQL user grant
 resource "mysql_grant" "app_user_privileges" {
   user       = mysql_user.app_user.user
   host       = mysql_user.app_user.host
   database   = var.mysql_cluster_database_name
-  privileges = ["SELECT", "INSERT", "UPDATE", "DELETE", "CREATE", "DROP", "INDEX", "ALTER"]
+  privileges = ["SELECT", "INSERT", "UPDATE"]
 }

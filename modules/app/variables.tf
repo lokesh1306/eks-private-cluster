@@ -40,7 +40,7 @@ variable "chart_version" {
 
 variable "mysql_sg_id" {
   description = "MySQL SG ID"
-  type = string
+  type        = string
 }
 
 variable "vpc_cidr" {
@@ -55,34 +55,25 @@ variable "region" {
 
 variable "mysql_cluster_id" {
   description = "MySQL Cluster ID"
-  type = string
+  type        = string
 }
 
 variable "mysql_cluster_endpoint" {
   description = "MySQL Cluster Endpoint"
-  type = string
-  ephemeral = true
-}
-
-variable "mysql_cluster_master_username" {
-  description = "MySQL Cluster Master User"
-  type = string
-  ephemeral = true
-}
-
-variable "mysql_cluster_master_password" {
-  description = "MySQL Cluster Master Password"
-  type = string
-  ephemeral = true
+  type        = string
 }
 
 variable "mysql_cluster_database_name" {
   description = "MySQL Cluster DB"
-  type = string
+  type        = string
 }
 
 variable "app_mysql_user" {
   type        = string
   description = "RDS App Username"
-  ephemeral = true
+}
+
+variable "cluster_name_fargate" {
+  type        = string
+  description = "Karpenter cluster name"
 }
