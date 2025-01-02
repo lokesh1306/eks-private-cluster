@@ -3,16 +3,16 @@ data "aws_region" "current" {}
 
 # Aurora Cluster
 resource "aws_rds_cluster" "mysql_cluster" {
-  cluster_identifier                  = var.rds_cluster_identifier
-  engine                              = var.rds_engine
-  engine_version                      = var.rds_engine_version
-  database_name                       = var.rds_database_name
-  master_username                     = var.master_username
-  manage_master_user_password         = true
-  backup_retention_period             = var.rds_backup_retention_period
-  preferred_backup_window             = var.rds_preferred_backup_window
-  storage_encrypted                   = true
-  storage_type                        = var.rds_storage_type
+  cluster_identifier          = var.rds_cluster_identifier
+  engine                      = var.rds_engine
+  engine_version              = var.rds_engine_version
+  database_name               = var.rds_database_name
+  master_username             = var.master_username
+  manage_master_user_password = true
+  backup_retention_period     = var.rds_backup_retention_period
+  preferred_backup_window     = var.rds_preferred_backup_window
+  storage_encrypted           = true
+  storage_type                = var.rds_storage_type
   # allocated_storage                   = var.rds_allocated_storage
   # db_cluster_instance_class           = var.db_cluster_instance_class
   vpc_security_group_ids              = [aws_security_group.mysql_sg.id]
@@ -40,7 +40,7 @@ resource "aws_rds_cluster_instance" "writer" {
 
 # reader instances
 resource "aws_rds_cluster_instance" "readers" {
-  count              = 2  
+  count              = 2
   identifier         = "reader-${count.index}-${var.common_tags["Environment"]}-${var.common_tags["Project"]}"
   cluster_identifier = aws_rds_cluster.mysql_cluster.id
   instance_class     = var.db_cluster_instance_class

@@ -150,5 +150,5 @@ module "rds" {
   rds_storage_type            = var.rds_storage_type
   # rds_allocated_storage       = var.rds_allocated_storage
   # rds_iops                    = var.rds_iops
-  depends_on                  = [module.vpcpeer]
+  depends_on = [module.vpcpeer]
 }
