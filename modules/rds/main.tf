@@ -31,7 +31,7 @@ resource "aws_rds_cluster" "mysql_cluster" {
 
 # writer instance
 resource "aws_rds_cluster_instance" "writer" {
-  identifier         = "writer"
+  identifier         = "writer-${var.common_tags["Environment"]}-${var.common_tags["Project"]}"
   cluster_identifier = aws_rds_cluster.mysql_cluster.id
   instance_class     = var.db_cluster_instance_class
   engine             = var.rds_engine
@@ -41,7 +41,7 @@ resource "aws_rds_cluster_instance" "writer" {
 # reader instances
 resource "aws_rds_cluster_instance" "readers" {
   count              = 2  
-  identifier         = "reader-${count.index}"
+  identifier         = "reader-${count.index}-${var.common_tags["Environment"]}-${var.common_tags["Project"]}"
   cluster_identifier = aws_rds_cluster.mysql_cluster.id
   instance_class     = var.db_cluster_instance_class
   engine             = var.rds_engine

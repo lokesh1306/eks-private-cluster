@@ -146,7 +146,7 @@ module "rds" {
   master_username             = var.master_username
   rds_backup_retention_period = var.rds_backup_retention_period
   rds_preferred_backup_window = var.rds_preferred_backup_window
-  # db_cluster_instance_class   = var.db_cluster_instance_class
+  db_cluster_instance_class   = var.db_cluster_instance_class
   rds_storage_type            = var.rds_storage_type
   # rds_allocated_storage       = var.rds_allocated_storage
   # rds_iops                    = var.rds_iops
