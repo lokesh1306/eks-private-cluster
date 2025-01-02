@@ -58,6 +58,11 @@ variable "mysql_cluster_id" {
   type        = string
 }
 
+variable "cluster_resource_id" {
+  description = "MySQL Cluster ID"
+  type        = string
+}
+
 variable "mysql_cluster_endpoint" {
   description = "MySQL Cluster Endpoint"
   type        = string
@@ -76,4 +81,8 @@ variable "app_mysql_user" {
 variable "cluster_name_fargate" {
   type        = string
   description = "Karpenter cluster name"
+}
+
+variable "delete_fargate_profile_dependency" {
+  type = string
 }

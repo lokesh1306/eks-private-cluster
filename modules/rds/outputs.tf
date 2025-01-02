@@ -6,6 +6,10 @@ output "mysql_cluster_id" {
   value = aws_rds_cluster.mysql_cluster.id
 }
 
+output "cluster_resource_id" {
+  value = aws_rds_cluster.mysql_cluster.cluster_resource_id
+}
+
 output "mysql_cluster_endpoint" {
   value = aws_rds_cluster.mysql_cluster.endpoint
 }

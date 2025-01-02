@@ -85,6 +85,8 @@ resource "helm_release" "app" {
     name  = "timestamp"
     value = timestamp()
   }
+
+  depends_on = [var.delete_fargate_profile_dependency]
 }
 
 # App access to DB
@@ -107,7 +109,7 @@ resource "aws_iam_policy" "rds_connect_policy" {
       {
         Effect   = "Allow"
         Action   = "rds-db:connect"
-        Resource = "arn:aws:rds-db:${var.region}:${data.aws_caller_identity.current.account_id}:dbuser:${var.mysql_cluster_id}/${var.app_mysql_user}"
+        Resource = "arn:aws:rds-db:${var.region}:${data.aws_caller_identity.current.account_id}:dbuser:${var.cluster_resource_id}/${var.app_mysql_user}"
       }
     ]
   })
@@ -117,19 +119,4 @@ resource "aws_iam_policy" "rds_connect_policy" {
 resource "aws_iam_role_policy_attachment" "attach_rds_connect_policy" {
   policy_arn = aws_iam_policy.rds_connect_policy.arn
   role       = aws_iam_role.app.name
-}
-
-# MySQL app user
-resource "mysql_user" "app_user" {
-  user        = var.app_mysql_user
-  host        = var.vpc_cidr
-  auth_plugin = "AWSAuthenticationPlugin"
-}
-
-# MySQL user grant
-resource "mysql_grant" "app_user_privileges" {
-  user       = mysql_user.app_user.user
-  host       = mysql_user.app_user.host
-  database   = var.mysql_cluster_database_name
-  privileges = ["SELECT", "INSERT", "UPDATE"]
 }

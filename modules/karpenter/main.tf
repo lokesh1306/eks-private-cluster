@@ -45,7 +45,7 @@ resource "null_resource" "delete_fargate_profile" {
         --fargate-profile-name karpenter
     EOT
   }
-
+  
   depends_on = [aws_eks_addon.ebs]
 }
 

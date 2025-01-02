@@ -18,8 +18,10 @@ resource "aws_rds_cluster" "mysql_cluster" {
   iops                                = var.rds_iops
   vpc_security_group_ids              = [aws_security_group.mysql_sg.id]
   db_subnet_group_name                = aws_db_subnet_group.mysql_subnet_group.name
+  skip_final_snapshot                 = true
   iam_database_authentication_enabled = true
   availability_zones                  = var.azs
+  enabled_cloudwatch_logs_exports     = ["audit", "error", "general", "slowquery"]
   tags = merge(
     {
       Name = "rds-${var.common_tags["Environment"]}-${var.common_tags["Project"]}"

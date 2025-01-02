@@ -115,10 +115,12 @@ module "app" {
   vpc_cidr                    = var.vpc_cidr
   region                      = var.region
   mysql_cluster_id            = module.rds.mysql_cluster_id
+  cluster_resource_id = module.rds.cluster_resource_id
   mysql_cluster_endpoint      = module.rds.mysql_cluster_endpoint
   mysql_cluster_database_name = module.rds.mysql_cluster_database_name
   app_mysql_user              = var.app_mysql_user
   cluster_name_fargate        = module.karpenter.cluster_name_fargate
+  delete_fargate_profile_dependency = module.karpenter.delete_fargate_profile_complete
 }
 
 module "rds" {
