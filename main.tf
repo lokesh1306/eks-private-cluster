@@ -112,21 +112,22 @@ module "app" {
     kubectl    = kubectl
     helm       = helm
   }
-  github_owner                      = var.github_owner
-  repo_name                         = var.repo_name
-  release_name                      = var.release_name
-  chart_name                        = var.chart_name
-  chart_version                     = var.chart_version
-  mysql_sg_id                       = module.rds.mysql_sg_id
-  vpc_cidr                          = var.vpc_cidr
-  region                            = var.region
-  mysql_cluster_id                  = module.rds.mysql_cluster_id
-  cluster_resource_id               = module.rds.cluster_resource_id
-  mysql_cluster_endpoint            = module.rds.mysql_cluster_endpoint
-  mysql_cluster_database_name       = module.rds.mysql_cluster_database_name
-  app_mysql_user                    = var.app_mysql_user
-  cluster_name_fargate              = module.karpenter.cluster_name_fargate
-  delete_fargate_profile_dependency = module.karpenter.delete_fargate_profile_complete
+  github_owner                = var.github_owner
+  repo_name                   = var.repo_name
+  release_name                = var.release_name
+  chart_name                  = var.chart_name
+  chart_version               = var.chart_version
+  mysql_sg_id                 = module.rds.mysql_sg_id
+  vpc_cidr                    = var.vpc_cidr
+  region                      = var.region
+  mysql_cluster_id            = module.rds.mysql_cluster_id
+  cluster_resource_id         = module.rds.cluster_resource_id
+  mysql_cluster_endpoint      = module.rds.mysql_cluster_endpoint
+  mysql_cluster_database_name = module.rds.mysql_cluster_database_name
+  app_mysql_user              = var.app_mysql_user
+  cluster_name_fargate        = module.karpenter.cluster_name_fargate
+  aws_acm_certificate_arn     = module.acm.aws_acm_certificate_arn
+  depends_on                  = [module.acm]
 }
 
 module "rds" {
@@ -151,4 +152,32 @@ module "rds" {
   # rds_allocated_storage       = var.rds_allocated_storage
   # rds_iops                    = var.rds_iops
   depends_on = [module.vpcpeer]
+}
+
+module "externaldns" {
+  source      = "./modules/externaldns"
+  common_tags = local.common_tags
+  providers = {
+    kubernetes = kubernetes
+    kubectl    = kubectl
+    helm       = helm
+    cloudflare = cloudflare
+  }
+  cf_email                          = var.cf_email
+  cf_domain                         = var.cf_domain
+  delete_fargate_profile_dependency = module.karpenter.delete_fargate_profile_complete
+}
+
+module "acm" {
+  source      = "./modules/acm"
+  common_tags = local.common_tags
+  providers = {
+    kubernetes = kubernetes
+    kubectl    = kubectl
+    helm       = helm
+    cloudflare = cloudflare
+  }
+  cf_domain          = var.cf_domain
+  cloudflare_zone_id = var.cloudflare_zone_id
+  depends_on         = [module.externaldns]
 }

@@ -2,18 +2,6 @@ data "aws_caller_identity" "current" {}
 data "aws_availability_zones" "available" {}
 data "aws_partition" "current" {}
 
-data "aws_rds_cluster" "mysql_cluster" {
-  cluster_identifier = var.mysql_cluster_id
-}
-
-ephemeral "aws_secretsmanager_secret_version" "mysql" {
-  secret_id = data.aws_rds_cluster.mysql_cluster.master_user_secret[0].secret_arn
-}
-
-locals {
-  mysql_credentials = jsondecode(ephemeral.aws_secretsmanager_secret_version.mysql.secret_string)
-}
-
 # k8 namespace for app
 resource "kubernetes_namespace" "app" {
   metadata {
@@ -80,13 +68,6 @@ resource "helm_release" "app" {
   chart      = var.chart_name
   version    = var.chart_version
   namespace  = kubernetes_namespace.app.metadata[0].name
-
-  set {
-    name  = "timestamp"
-    value = timestamp()
-  }
-
-  depends_on = [var.delete_fargate_profile_dependency]
 }
 
 # App access to DB
@@ -119,4 +100,16 @@ resource "aws_iam_policy" "rds_connect_policy" {
 resource "aws_iam_role_policy_attachment" "attach_rds_connect_policy" {
   policy_arn = aws_iam_policy.rds_connect_policy.arn
   role       = aws_iam_role.app.name
+}
+
+# Cert
+resource "kubernetes_config_map" "tls_cert_configmap" {
+  metadata {
+    name      = "ssl-${var.common_tags["Environment"]}-${var.common_tags["Project"]}"
+    namespace = kubernetes_namespace.app.metadata[0].name
+  }
+
+  data = {
+    acm_certificate_arn = var.aws_acm_certificate_arn
+  }
 }

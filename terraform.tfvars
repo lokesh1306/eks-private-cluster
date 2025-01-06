@@ -45,3 +45,10 @@ master_username = "admin"
 # rds_engine_version          = "8.0.40"
 # rds_engine                  = "mysql"
 # rds_storage_type            = "io1"
+
+# Cloudflare
+cf_email  = "chlokesh1306@gmail.com"
+cf_domain = "test.lokesh.cloud"
+
+# ACM
+cloudflare_zone_id = "8effcfd85e73a9dbaccbda956f99e15b"

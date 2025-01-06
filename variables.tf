@@ -169,3 +169,19 @@ variable "app_mysql_user" {
   type        = string
   description = "App MySQL User"
 }
+
+// Cloudflare
+variable "cf_email" {
+  type        = string
+  description = "CF Email"
+}
+
+variable "cf_domain" {
+  type        = string
+  description = "CF Domain"
+}
+
+// ACM
+variable "cloudflare_zone_id" {
+  type = string
+}

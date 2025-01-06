@@ -1,5 +1,6 @@
 resource "random_uuid" "bucket1" {}
 resource "random_uuid" "bucket2" {}
+data "aws_caller_identity" "current" {}
 
 # S3 bucket1
 resource "aws_s3_bucket" "bucket1" {
@@ -100,3 +101,44 @@ resource "aws_vpc_endpoint" "s3" {
     var.common_tags
   )
 }
+
+# # Bucket polciy to restrict access to VPCe/caller
+# resource "aws_s3_bucket_policy" "bucket2" {
+#   bucket = aws_s3_bucket.bucket2.id
+
+#   policy = jsonencode({
+#     Version = "2012-10-17",
+#     Statement = [
+#       {
+#         Sid       = "VPCe",
+#         Effect    = "Deny",
+#         Principal = "*",
+#         Action    = "s3:*",
+#         Resource  = [
+#           "arn:aws:s3:::${aws_s3_bucket.bucket2.id}",
+#           "arn:aws:s3:::${aws_s3_bucket.bucket2.id}/*"
+#         ],
+#         Condition = {
+#           StringNotEquals = {
+#             "aws:sourceVpce" = aws_vpc_endpoint.s3.id
+#           }
+#         }
+#       },
+#       {
+#         Sid       = "Caller",
+#         Effect    = "Deny",
+#         Principal = "*",
+#         Action    = "s3:*",
+#         Resource  = [
+#           "arn:aws:s3:::${aws_s3_bucket.bucket2.id}",
+#           "arn:aws:s3:::${aws_s3_bucket.bucket2.id}/*"
+#         ],
+#         Condition = {
+#           StringNotLike = {
+#             "aws:userid" = "arn:aws:sts::${data.aws_caller_identity.current.account_id}:assumed-role/EC2-SSM-Access-Role/*"
+#           }
+#         }
+#       }
+#     ]
+#   })
+# }

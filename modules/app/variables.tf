@@ -83,6 +83,7 @@ variable "cluster_name_fargate" {
   description = "Karpenter cluster name"
 }
 
-variable "delete_fargate_profile_dependency" {
-  type = string
+variable "aws_acm_certificate_arn" {
+  type        = string
+  description = "ACM ARN"
 }
