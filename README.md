@@ -1,6 +1,6 @@
 # EKS Private Cluster
 
-## Architecture Diagram
+## High Level Architecture Diagram
 ![architecture_diagram_nobg](./architecture_diagram_nobg.png)
 
 ## Overview
