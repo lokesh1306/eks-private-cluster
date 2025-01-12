@@ -1,5 +1,8 @@
 # EKS Private Cluster
 
+## Architecture Diagram
+![architecture_diagram_nobg](./architecture_diagram_nobg.png)
+
 ## Overview
 This repository contains Terraform code to deploy a private Amazon Elastic Kubernetes Service (EKS) cluster and its supporting services, including Aurora MySQL, S3, SQS, ACM, and VPC peering, using a modular architecture. This project works in tandem with the SSM Private Access project to ensure secure, internet-free communication within AWS, leveraging private VPC networking and VPC endpoints.
 
