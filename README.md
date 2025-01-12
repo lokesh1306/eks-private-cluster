@@ -141,14 +141,14 @@ terraform apply
 - S3: The S3 bucket can be accessed using the bucket name and IAM Role for Service Account. The application pod includes 'cli' container which uses ServiceAccount configured with IRSA to access the queues
 - Pods: The application includes a 'kubectl' container which can be used to access the pods in kube-system namespace, restricted via RBAC
 
-### SSM Access/Debug Commands
+## SSM Access/Debug Commands
 
-# Access EC2 Instance
+### Access EC2 Instance
 ```
 aws ssm start-session --target <instance-id>
 ```
 
-# Verify endpoints  
+### Verify endpoints  
 ```
 aws ec2 describe-vpc-endpoints --vpc-endpoint-ids <endpoint-id>
 ```
